@@ -1,6 +1,8 @@
 package upcloud
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"testing"
 )
@@ -40,4 +42,43 @@ func TestUpcloud_GetAccount(t *testing.T) {
 	if a.Username != username {
 		t.Fatalf("invalid username, expected %s and received %s", username, a.Username)
 	}
+}
+
+func ExampleNew() {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Initialize new instance of UpCloud SDK
+	if u, err = New("username", "password"); err != nil {
+		// Error encountered while initializing SDK, return
+		log.Fatal(err)
+	}
+
+	// UpCloud SDK is now ready to use!
+	fmt.Println("UpCloud SDK is now ready to use!", u)
+}
+
+func ExampleUpCloud_GetAccount() {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Initialize new instance of UpCloud SDK
+	if u, err = New("username", "password"); err != nil {
+		// Error encountered while initializing SDK, return
+		log.Fatal(err)
+	}
+
+	var a *Account
+	// Get account information of currently logged in user
+	if a, err = u.GetAccount(); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	// Log account information
+	fmt.Printf("My username is %s and I have %s credits", a.Username, a.Credits)
 }
