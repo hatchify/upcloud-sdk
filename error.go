@@ -8,8 +8,11 @@ type Error struct {
 	Message string `json:"error_message"`
 }
 
-func (e *Error) Error() error {
-	return fmt.Errorf("%s [%s]", e.Message, e.Code)
+// Error will return the error representation of the Error
+// Note: This causes Error to match the error interface
+func (e *Error) Error() string {
+	// Return a formatted version of the error message and code
+	return fmt.Sprintf("%s [%s]", e.Message, e.Code)
 }
 
 type errorResponse struct {
