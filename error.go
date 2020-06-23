@@ -2,9 +2,11 @@ package upcloud
 
 import "fmt"
 
-// Error represents an error response payload
+// Error represents an UpCloud API error response payload
 type Error struct {
-	Code    string `json:"error_code"`
+	// UpCloud error code
+	Code string `json:"error_code"`
+	// UpCloud error message
 	Message string `json:"error_message"`
 }
 
@@ -15,6 +17,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%s [%s]", e.Message, e.Code)
 }
 
+// errorResponse is a response wrapper to match the UpCloud API payload
 type errorResponse struct {
 	Error *Error `json:"error"`
 }
