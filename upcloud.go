@@ -15,6 +15,11 @@ const (
 	APIVersion = "1.3"
 )
 
+const (
+	// RouteGetAccount is the route for getting current account
+	RouteGetAccount = "account"
+)
+
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
 	var u UpCloud
@@ -75,4 +80,15 @@ func (u *UpCloud) handleError(body io.Reader) (err error) {
 	}
 
 	return errResp.Error.Error()
+}
+
+// GetAccount will get the account of the currently logged in user
+func (u *UpCloud) GetAccount() (a *Account, err error) {
+	var resp getAccountResponse
+	if err = u.request("GET", RouteGetAccount, nil, &resp); err != nil {
+		return
+	}
+
+	a = resp.Account
+	return
 }
