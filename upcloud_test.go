@@ -1,10 +1,49 @@
-# UpCloud SDK [![GoDoc](https://godoc.org/github.com/hatchify/upcloud-sdk?status.svg)](https://godoc.org/github.com/hatchify/upcloud-sdk) ![Status](https://img.shields.io/badge/status-beta-yellow.svg)
+package upcloud
 
-UpCloud SDK is an SDK wrapper for the UpCloud API
+import (
+	"fmt"
+	"log"
+	"os"
+	"testing"
+)
 
-## Usage 
-### New
-```go
+func TestNew(t *testing.T) {
+	var err error
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if _, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUpcloud_GetAccount(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var a *Account
+	if a, err = u.GetAccount(); err != nil {
+		t.Fatal(err)
+	}
+
+	if a.Username != username {
+		t.Fatalf("invalid username, expected %s and received %s", username, a.Username)
+	}
+}
+
 func ExampleNew() {
 	var (
 		u   *UpCloud
@@ -20,10 +59,6 @@ func ExampleNew() {
 	// UpCloud SDK is now ready to use!
 	fmt.Println("UpCloud SDK is now ready to use!", u)
 }
-```
-
-### UpCloud.GetAccount
-```go
 
 func ExampleUpCloud_GetAccount() {
 	var (
@@ -47,4 +82,3 @@ func ExampleUpCloud_GetAccount() {
 	// Log account information
 	fmt.Printf("My username is %s and I have %s credits", a.Username, a.Credits)
 }
-```
