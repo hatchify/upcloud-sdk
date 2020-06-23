@@ -27,8 +27,11 @@ func New(username, password string) (up *UpCloud, err error) {
 		return
 	}
 
+	// Set username
 	u.username = username
+	// Set password
 	u.password = password
+	// Assign pointer reference
 	up = &u
 	return
 }
@@ -38,57 +41,86 @@ type UpCloud struct {
 	hc   http.Client
 	host *url.URL
 
+	// Login credentials
 	username string
 	password string
 }
 
-func (u *UpCloud) getURL(endpoint string) (url string) {
-	reqURL := *u.host
-	reqURL.Path = path.Join(APIVersion, endpoint)
-	return reqURL.String()
-}
-
 func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interface{}) (err error) {
 	var req *http.Request
-	if req, err = http.NewRequest(method, u.getURL(endpoint), body); err != nil {
+	// Create a new request
+	if req, err = u.newHTTPRequest(method, u.getURL(endpoint), body); err != nil {
+		// Error encountered while creating new HTTP request, return
 		return
 	}
-
-	req.SetBasicAuth(u.username, u.password)
 
 	var res *http.Response
+	// Perform request using SDK's underlying HTTP client
 	if res, err = u.hc.Do(req); err != nil {
+		// Error encountered while performing request, return
 		return
 	}
+	// Defer closing the HTTP response body
 	defer res.Body.Close()
 
-	if res.StatusCode >= 400 {
-		return u.handleError(res.Body)
-	}
+	// Process HTTP response from UpCloud API
+	return u.processResponse(res, resp)
+}
 
-	if err = json.NewDecoder(res.Body).Decode(&resp); err != nil {
+func (u *UpCloud) newHTTPRequest(method, url string, body io.Reader) (req *http.Request, err error) {
+	// Create a new request using provided method, url, and body
+	if req, err = http.NewRequest(method, url, body); err != nil {
+		// Error encoutered while creating new HTTP request, return
 		return
 	}
 
+	// Set API authentication using the username/password provided at SDK initialization
+	req.SetBasicAuth(u.username, u.password)
 	return
 }
 
-func (u *UpCloud) handleError(body io.Reader) (err error) {
+func (u *UpCloud) getURL(endpoint string) (url string) {
+	// Create copy of host url.URL by derefencing source pointer
+	reqURL := *u.host
+	// Set the url path by concatinating the api version and the provided endpoint
+	reqURL.Path = path.Join(APIVersion, endpoint)
+	// Return the string representation of the built url
+	return reqURL.String()
+}
+
+func (u *UpCloud) processResponse(res *http.Response, value interface{}) (err error) {
+	// Check to see if error was successful
+	if res.StatusCode >= 400 {
+		// Error status code encountered, process as error
+		return u.processError(res.Body)
+	}
+
+	// Initialize new JSON decoder and attempt to decode as provided value
+	err = json.NewDecoder(res.Body).Decode(&value)
+	return
+}
+
+func (u *UpCloud) processError(body io.Reader) (err error) {
 	var errResp errorResponse
+	// Initialize new JSON decoder and attempt to decode as an error response
 	if err = json.NewDecoder(body).Decode(&errResp); err != nil {
+		// Error encountered while decoding, return
 		return
 	}
 
+	// Return the error value of the error response
 	return errResp.Error.Error()
 }
 
 // GetAccount will get the account of the currently logged in user
 func (u *UpCloud) GetAccount() (a *Account, err error) {
 	var resp getAccountResponse
+	// Make request to "Get Account" route
 	if err = u.request("GET", RouteGetAccount, nil, &resp); err != nil {
 		return
 	}
 
+	// Set return value from response
 	a = resp.Account
 	return
 }
