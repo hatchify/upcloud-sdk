@@ -108,8 +108,9 @@ func (u *UpCloud) processError(body io.Reader) (err error) {
 		return
 	}
 
-	// Return the error value of the error response
-	return errResp.Error.Error()
+	// Set returning error as the error response's Error value
+	err = errResp.Error
+	return
 }
 
 // GetAccount will get the account of the currently logged in user
