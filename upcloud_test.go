@@ -9,10 +9,19 @@ import (
 
 func TestNew(t *testing.T) {
 	var err error
+	var username string
+	var password string
+	var ok bool
+
 	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
+	if username, ok = os.LookupEnv("UPCLOUD_USERNAME"); !ok {
+		t.Fatal("$UPCLOUD_USERNAME not set")
+	}
+
 	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
+	if password, ok = os.LookupEnv("UPCLOUD_PASSWORD"); !ok {
+		t.Fatal("$UPCLOUD_PASSWORD not set")
+	}
 
 	if _, err = New(username, password); err != nil {
 		t.Fatal(err)

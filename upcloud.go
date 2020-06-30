@@ -2,6 +2,7 @@ package upcloud
 
 import (
 	"encoding/json"
+	"github.com/hatchify/requester"
 	"io"
 	"net/http"
 	"net/url"
@@ -27,9 +28,8 @@ const (
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
 	var u UpCloud
-	if u.host, err = url.Parse(Hostname); err != nil {
-		return
-	}
+
+	u.req = requester.New(&http.Client{}, Hostname)
 
 	// Set username
 	u.username = username
@@ -42,7 +42,7 @@ func New(username, password string) (up *UpCloud, err error) {
 
 // UpCloud manages requests to the UpCloud API
 type UpCloud struct {
-	hc   http.Client
+	req  *requester.Requester
 	host *url.URL
 
 	// Login credentials
@@ -50,18 +50,16 @@ type UpCloud struct {
 	password string
 }
 
-func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interface{}) (err error) {
-	var req *http.Request
-	// Create a new request
-	if req, err = u.newHTTPRequest(method, u.getURL(endpoint), body); err != nil {
-		// Error encountered while creating new HTTP request, return
-		return
+func (u *UpCloud) request(method, endpoint string, body []byte, resp interface{}) (err error) {
+	var res *http.Response
+
+	// We authenticate with BasicAuth
+	var setBasicAuth requester.Modifier = func(request *http.Request, client *http.Client) (err error) {
+		request.SetBasicAuth(u.username, u.password)
+		return nil
 	}
 
-	var res *http.Response
-	// Perform request using SDK's underlying HTTP client
-	if res, err = u.hc.Do(req); err != nil {
-		// Error encountered while performing request, return
+	if res, err = u.req.Request(method, u.getURL(endpoint), body, requester.Opts{setBasicAuth}); err != nil {
 		return
 	}
 	// Defer closing the HTTP response body
@@ -71,25 +69,9 @@ func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interfac
 	return u.processResponse(res, resp)
 }
 
-func (u *UpCloud) newHTTPRequest(method, url string, body io.Reader) (req *http.Request, err error) {
-	// Create a new request using provided method, url, and body
-	if req, err = http.NewRequest(method, url, body); err != nil {
-		// Error encoutered while creating new HTTP request, return
-		return
-	}
-
-	// Set API authentication using the username/password provided at SDK initialization
-	req.SetBasicAuth(u.username, u.password)
-	return
-}
-
 func (u *UpCloud) getURL(endpoint string) (url string) {
-	// Create copy of host url.URL by derefencing source pointer
-	reqURL := *u.host
-	// Set the url path by concatinating the api version and the provided endpoint
-	reqURL.Path = path.Join(APIVersion, endpoint)
-	// Return the string representation of the built url
-	return reqURL.String()
+	// Set the url path by concatenating the api version and the provided endpoint
+	return path.Join(APIVersion, endpoint)
 }
 
 func (u *UpCloud) processResponse(res *http.Response, value interface{}) (err error) {
