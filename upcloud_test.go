@@ -151,3 +151,60 @@ func TestUpCloud_GetPlans(t *testing.T) {
 		}
 	}
 }
+
+func TestUpCloud_GetServerSizes(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var serverSizes *[]ServerSize
+	// Get plans information of currently logged in user
+	if serverSizes, err = u.GetServerSizes(); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	for _, ss := range *serverSizes {
+		if ss.MemoryAmount == "2048" && ss.CoreNumber == "1" {
+			fmt.Println("We found our 2048mb with 1 core machine!")
+			// Output: We found our 2048mb with 1 core machine!
+		}
+	}
+}
+
+func TestUpCloud_GetServers(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	for _, s := range *servers {
+		fmt.Println(s)
+	}
+}

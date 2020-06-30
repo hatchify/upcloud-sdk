@@ -23,6 +23,10 @@ const (
 	RouteGetZone = "zone"
 	// RouteGetPlan gets all the plans
 	RouteGetPlan = "plan"
+	// RouteGetServerSize gets all the server sizes
+	RouteGetServerSize = "server_size"
+	// RouteGetServer gets all the servers
+	RouteGetServer = "server"
 )
 
 // New will return a new instance of the UpCloud API SDK
@@ -121,19 +125,45 @@ func (u *UpCloud) GetZones() (z *[]Zone, err error) {
 	}
 
 	// Set return value from response
-	z = resp.ZonesWrapper.Zone
+	z = resp.Zones.Zone
 	return
 }
 
 // GetPlans
 func (u *UpCloud) GetPlans() (p *[]Plan, err error) {
 	var resp getPlansResponse
-	// Make request to "Get Zones" route
+	// Make request to "Get Plans" route
 	if err = u.request("GET", RouteGetPlan, nil, &resp); err != nil {
 		return
 	}
 
 	// Set return value from response
-	p = resp.PlansWrapper.Plan
+	p = resp.Plans.Plan
+	return
+}
+
+// GetServerSizes
+func (u *UpCloud) GetServerSizes() (p *[]ServerSize, err error) {
+	var resp getServerSizesResponse
+	// Make request to "Get Server Sizes" route
+	if err = u.request("GET", RouteGetServerSize, nil, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	p = resp.ServerSizes.ServerSize
+	return
+}
+
+// GetServers
+func (u *UpCloud) GetServers() (p *[]Server, err error) {
+	var resp getServersResponse
+	// Make request to "Get Servers" route
+	if err = u.request("GET", RouteGetServer, nil, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	p = resp.Servers.Server
 	return
 }

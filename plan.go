@@ -11,11 +11,11 @@ type Plan struct {
 }
 
 // Plans represents all UpCloud plans
-type PlansWrapper struct {
+type Plans struct {
 	Plan *[]Plan `json:"plan"`
 }
 
 // getPlansResponse is a response wrapper to match the UpCloud API payload
 type getPlansResponse struct {
-	PlansWrapper *PlansWrapper `json:"plans"`
+	Plans *Plans `json:"plans"`
 }

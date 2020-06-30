@@ -8,11 +8,11 @@ type Zone struct {
 }
 
 // Zones represents all UpCloud zones
-type ZonesWrapper struct {
+type Zones struct {
 	Zone *[]Zone `json:"zone"`
 }
 
 // getZonesResponse is a response wrapper to match the UpCloud API payload
 type getZonesResponse struct {
-	ZonesWrapper *ZonesWrapper `json:"zones"`
+	Zones *Zones `json:"zones"`
 }
