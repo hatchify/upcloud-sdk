@@ -112,3 +112,33 @@ func TestUpCloud_GetZones(t *testing.T) {
 		}
 	}
 }
+
+func TestUpCloud_GetPlans(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var plans *[]Plan
+	// Get plans information of currently logged in user
+	if plans, err = u.GetPlans(); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	for _, p := range *plans {
+		if p.Name == "1xCPU-2GB" && p.CoreNumber == 1 {
+			fmt.Println(p.Name)
+			// Output: 1xCPU-2GB
+		}
+	}
+}
