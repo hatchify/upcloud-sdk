@@ -18,6 +18,8 @@ const (
 const (
 	// RouteGetAccount is the route for getting current account
 	RouteGetAccount = "account"
+	// RouteGetZone gets all the zones
+	RouteGetZone = "zone"
 )
 
 // New will return a new instance of the UpCloud API SDK
@@ -123,5 +125,18 @@ func (u *UpCloud) GetAccount() (a *Account, err error) {
 
 	// Set return value from response
 	a = resp.Account
+	return
+}
+
+// GetZones
+func (u *UpCloud) GetZones() (z *[]Zone, err error) {
+	var resp getZonesResponse
+	// Make request to "Get Zones" route
+	if err = u.request("GET", RouteGetZone, nil, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	z = resp.ZonesWrapper.Zone
 	return
 }

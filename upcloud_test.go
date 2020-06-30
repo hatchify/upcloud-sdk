@@ -82,3 +82,33 @@ func ExampleUpCloud_GetAccount() {
 	// Log account information
 	fmt.Printf("My username is %s and I have %s credits", a.Username, a.Credits)
 }
+
+func TestUpCloud_GetZones(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var zones *[]Zone
+	// Get zones information of currently logged in user
+	if zones, err = u.GetZones(); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	for _, z := range *zones {
+		if z.ID == "de-fra1" && z.Description == "Frankfurt #1" {
+			fmt.Println(z.ID)
+			// Output: de-fra1
+		}
+	}
+}
