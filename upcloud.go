@@ -27,7 +27,23 @@ const (
 	RouteGetServerSize = "server_size"
 	// RouteGetServer gets all the servers
 	RouteGetServer = "server"
+	// RouteGetStorage gets all the storage options for the server
+	RouteGetStorage = "storage"
 )
+
+// RouteGetStorageFilter
+type RouteGetStorageFilter string
+const (
+	All RouteGetStorageFilter = "storage"
+	Public RouteGetStorageFilter = "storage/public"
+	Private RouteGetStorageFilter = "storage/private"
+	Normal RouteGetStorageFilter = "storage/normal"
+	Backup RouteGetStorageFilter = "storage/backup"
+	Cdrom RouteGetStorageFilter = "storage/cdrom"
+	Template RouteGetStorageFilter = "storage/template"
+	Favorite RouteGetStorageFilter = "storage/favorite"
+)
+
 
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
@@ -172,11 +188,11 @@ func (u *UpCloud) GetServers() (p *[]Server, err error) {
 	return
 }
 
-// GetServerDetails
-func (u *UpCloud) GetServerDetails(id string) (p *ServerDetails, err error) {
+// GetServerDetails requires UUID of the server to get the details
+func (u *UpCloud) GetServerDetails(uuid string) (p *ServerDetails, err error) {
 	var resp getServerDetailsResponse
 	// Make request to "Get Servers" route
-	if err = u.request("GET", path.Join(RouteGetServer, id), nil, &resp); err != nil {
+	if err = u.request("GET", path.Join(RouteGetServer, uuid), nil, &resp); err != nil {
 		return
 	}
 
@@ -184,4 +200,19 @@ func (u *UpCloud) GetServerDetails(id string) (p *ServerDetails, err error) {
 	p = resp.ServerDetails
 	return
 }
+
+// GetStorages
+func (u *UpCloud) GetStorages(filter RouteGetStorageFilter) (p *[]Storage, err error) {
+	var resp getStoragesResponse
+	// Make request to "Get Servers" route
+	if err = u.request("GET", string(filter), nil, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	p = resp.Storages.Storage
+	return
+}
+
+
 

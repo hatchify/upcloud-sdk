@@ -250,3 +250,28 @@ func TestUpCloud_GetServerDetails(t *testing.T) {
 		fmt.Println("found our machine in server details")
 	}
 }
+
+func TestUpCloud_GetStorages(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	var storages *[]Storage
+	// Get storages
+	if storages, err = u.GetStorages(Public); err != nil {
+		// Error encountered while getting storages
+		log.Fatal(err)
+	}
+
+	fmt.Println((*storages)[0].Access == "public")
+}
