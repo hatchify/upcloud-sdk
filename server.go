@@ -13,12 +13,12 @@ type IPAddresses struct {
 	IPAddress *[]IPAddress `json:"ip_address"`
 }
 type Interface struct {
-	Index       int         `json:"index"`
+	Index       int          `json:"index"`
 	IPAddresses *IPAddresses `json:"ip_addresses"`
-	Mac         string      `json:"mac"`
-	Network     string      `json:"network"`
-	Type        string      `json:"type"`
-	Bootable    string      `json:"bootable"`
+	Mac         string       `json:"mac"`
+	Network     string       `json:"network"`
+	Type        string       `json:"type"`
+	Bootable    string       `json:"bootable"`
 }
 type Interfaces struct {
 	Interface *[]Interface `json:"interface"`
@@ -27,12 +27,14 @@ type Networking struct {
 	Interfaces *Interfaces `json:"interfaces"`
 }
 type StorageDevice struct {
+	Action       string `json:"action"`
 	Address      string `json:"address"`
 	PartOfPlan   string `json:"part_of_plan"`
 	Storage      string `json:"storage"`
 	StorageSize  int    `json:"storage_size"`
 	StorageTitle string `json:"storage_title"`
 	Type         string `json:"type"`
+	Title        string `json:"title"`
 	BootDisk     string `json:"boot_disk"`
 }
 type StorageDevices struct {
@@ -96,7 +98,7 @@ type getServersResponse struct {
 	Servers *Servers `json:"servers"`
 }
 
-// getServerDetailsResponse is a response wrapper to match the UpCloud API payload
-type getServerDetailsResponse struct {
+// serverDetailsWrapper is a response wrapper to match the UpCloud API payload
+type serverDetailsWrapper struct {
 	ServerDetails *ServerDetails `json:"server"`
 }

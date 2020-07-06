@@ -25,13 +25,11 @@ const (
 	RouteGetPlan = "plan"
 	// RouteGetServerSize gets all the server sizes
 	RouteGetServerSize = "server_size"
-	// RouteGetServer gets all the servers
-	RouteGetServer = "server"
-	// RouteGetStorage gets all the storage options for the server
-	RouteGetStorage = "storage"
+	// RouteServer manages all the servers
+	RouteServer = "server"
 )
 
-// RouteGetStorageFilter
+// RouteGetStorageFilter gets all the storage options for the server
 type RouteGetStorageFilter string
 const (
 	All RouteGetStorageFilter = "storage"
@@ -179,7 +177,7 @@ func (u *UpCloud) GetServerSizes() (p *[]ServerSize, err error) {
 func (u *UpCloud) GetServers() (p *[]Server, err error) {
 	var resp getServersResponse
 	// Make request to "Get Servers" route
-	if err = u.request("GET", RouteGetServer, nil, &resp); err != nil {
+	if err = u.request("GET", RouteServer, nil, &resp); err != nil {
 		return
 	}
 
@@ -190,9 +188,9 @@ func (u *UpCloud) GetServers() (p *[]Server, err error) {
 
 // GetServerDetails requires UUID of the server to get the details
 func (u *UpCloud) GetServerDetails(uuid string) (p *ServerDetails, err error) {
-	var resp getServerDetailsResponse
+	var resp serverDetailsWrapper
 	// Make request to "Get Servers" route
-	if err = u.request("GET", path.Join(RouteGetServer, uuid), nil, &resp); err != nil {
+	if err = u.request("GET", path.Join(RouteServer, uuid), nil, &resp); err != nil {
 		return
 	}
 
@@ -211,6 +209,27 @@ func (u *UpCloud) GetStorages(filter RouteGetStorageFilter) (p *[]Storage, err e
 
 	// Set return value from response
 	p = resp.Storages.Storage
+	return
+}
+
+
+// CreateServer
+func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, err error) {
+
+	//Dress up our new server in and wrap it
+	var req = serverDetailsWrapper{
+		ServerDetails: serverDetails,
+	}
+	var reqJson, _ = json.Marshal(req)
+
+	var resp serverDetailsWrapper
+	//Let's go and make us a server
+	if err = u.request("POST", RouteServer, reqJson, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	p = resp.ServerDetails
 	return
 }
 
