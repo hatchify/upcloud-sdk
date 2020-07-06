@@ -44,9 +44,13 @@ func New(username, password string) (up *UpCloud, err error) {
 	return
 }
 
+func (u *UpCloud) SetRequester(newReq requester.Interface) {
+	u.req = newReq
+}
+
 // UpCloud manages requests to the UpCloud API
 type UpCloud struct {
-	req  *requester.Requester
+	req  requester.Interface
 	host *url.URL
 
 	// Login credentials
@@ -167,3 +171,17 @@ func (u *UpCloud) GetServers() (p *[]Server, err error) {
 	p = resp.Servers.Server
 	return
 }
+
+// GetServerDetails
+func (u *UpCloud) GetServerDetails(id string) (p *ServerDetails, err error) {
+	var resp getServerDetailsResponse
+	// Make request to "Get Servers" route
+	if err = u.request("GET", path.Join(RouteGetServer, id), nil, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	p = resp.ServerDetails
+	return
+}
+

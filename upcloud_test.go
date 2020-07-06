@@ -2,7 +2,9 @@ package upcloud
 
 import (
 	"fmt"
+	"github.com/hatchify/requester"
 	"log"
+	"net/http"
 	"os"
 	"testing"
 )
@@ -107,10 +109,12 @@ func TestUpCloud_GetZones(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
+
 	var zones *[]Zone
 	// Get zones information of currently logged in user
 	if zones, err = u.GetZones(); err != nil {
-		// Error encountered while getting account information
+		// Error encountered while getting zones information
 		log.Fatal(err)
 	}
 
@@ -200,11 +204,49 @@ func TestUpCloud_GetServers(t *testing.T) {
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
-		// Error encountered while getting account information
+		// Error encountered while getting servers
 		log.Fatal(err)
 	}
 
 	for _, s := range *servers {
 		fmt.Println(s)
+	}
+}
+
+func TestUpCloud_GetServerDetails(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
+		log.Fatal(err)
+	}
+
+	var oneWeFound = (*servers)[0].UUID
+
+	var serverDetails *ServerDetails
+	// Get servers of currently logged in user
+	if serverDetails, err = u.GetServerDetails(oneWeFound); err != nil {
+		// Error encountered while getting account information
+		log.Fatal(err)
+	}
+
+	if serverDetails.Hostname == "hatch-dev" {
+		fmt.Println("found our machine in server details")
 	}
 }
