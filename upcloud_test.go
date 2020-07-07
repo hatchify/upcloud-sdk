@@ -9,6 +9,22 @@ import (
 	"testing"
 )
 
+func setup(t *testing.T) (u *UpCloud, err error) {
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal("Couldn't create UpCloud object")
+	}
+
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+
+	return
+}
+
 func TestNew(t *testing.T) {
 	var err error
 	var username string
@@ -31,28 +47,15 @@ func TestNew(t *testing.T) {
 }
 
 func TestUpcloud_GetAccount(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
+	u, err := setup(t)
 
 	var a *Account
 	if a, err = u.GetAccount(); err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(a)
 
-	if a.Username != username {
-		t.Fatalf("invalid username, expected %s and received %s", username, a.Username)
-	}
 }
 
 func ExampleNew() {
@@ -95,21 +98,8 @@ func ExampleUpCloud_GetAccount() {
 }
 
 func TestUpCloud_GetZones(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test.json")))
+	u, err := setup(t)
 
 	var zones *[]Zone
 	// Get zones information of currently logged in user
@@ -127,19 +117,8 @@ func TestUpCloud_GetZones(t *testing.T) {
 }
 
 func TestUpCloud_GetPlans(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
+	u, err := setup(t)
 
 	var plans *[]Plan
 	// Get plans information of currently logged in user
@@ -157,19 +136,8 @@ func TestUpCloud_GetPlans(t *testing.T) {
 }
 
 func TestUpCloud_GetServerSizes(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
+	u, err := setup(t)
 
 	var serverSizes *[]ServerSize
 	// Get plans information of currently logged in user
@@ -187,19 +155,8 @@ func TestUpCloud_GetServerSizes(t *testing.T) {
 }
 
 func TestUpCloud_GetServers(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
+	u, err := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -214,21 +171,8 @@ func TestUpCloud_GetServers(t *testing.T) {
 }
 
 func TestUpCloud_GetServerDetails(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test.json")))
+	u, err := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -255,19 +199,8 @@ func TestUpCloud_GetServerDetails(t *testing.T) {
 }
 
 func TestUpCloud_GetStorages(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
+	u, err := setup(t)
 
 	var storages *[]Storage
 	// Get storages
@@ -280,21 +213,8 @@ func TestUpCloud_GetStorages(t *testing.T) {
 }
 
 func TestUpCloud_CreateServer(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u, err := setup(t)
 
 	var networking = &Networking{
 		Interfaces: &Interfaces{
@@ -335,21 +255,8 @@ func TestUpCloud_CreateServer(t *testing.T) {
 }
 
 func TestUpCloud_StopServer(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u, err := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -365,7 +272,7 @@ func TestUpCloud_StopServer(t *testing.T) {
 
 	var serverDetails *ServerDetails
 	// Get servers details of the server we are about to stop
-	serverDetails, err = u.StopServer(oneWeFound, StopServer{StopType: string(Soft), Timeout:  "60"})
+	serverDetails, err = u.StopServer(oneWeFound, StopServer{StopType: string(Soft), Timeout: "60"})
 	if err != nil {
 		// Error encountered while stopping the server
 		log.Fatal(err)
@@ -377,21 +284,8 @@ func TestUpCloud_StopServer(t *testing.T) {
 }
 
 func TestUpCloud_StartServer(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u, err := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -418,23 +312,9 @@ func TestUpCloud_StartServer(t *testing.T) {
 	}
 }
 
-
 func TestUpCloud_DeleteServer(t *testing.T) {
-	var (
-		u   *UpCloud
-		err error
-	)
 
-	// Get username from OS environment
-	username := os.Getenv("UPCLOUD_USERNAME")
-	// Get password from OS environment
-	password := os.Getenv("UPCLOUD_PASSWORD")
-
-	if u, err = New(username, password); err != nil {
-		t.Fatal(err)
-	}
-
-	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u, err := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -451,6 +331,5 @@ func TestUpCloud_DeleteServer(t *testing.T) {
 			fmt.Println("things didn't go well in deleting")
 			log.Fatal(err)
 		}
-
 	}
 }
