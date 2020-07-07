@@ -80,7 +80,7 @@ type UpCloud struct {
 	password string
 }
 
-func (u *UpCloud) request(method, endpoint string, body []byte, resp interface{}) (err error) {
+func (u *UpCloud) request(method, endpoint string, opts requester.Opts, body []byte, resp interface{}) (err error) {
 	var res *http.Response
 
 	// We authenticate with BasicAuth
@@ -89,12 +89,15 @@ func (u *UpCloud) request(method, endpoint string, body []byte, resp interface{}
 		return nil
 	}
 
+	// These content-type headers are needed for when we post things
 	var setHeaders requester.Headers = requester.NewHeaders(requester.Header{
 		Key: "Content-Type",
 		Val: "application/json",
 	})
 
-	if res, err = u.req.Request(method, u.getURL(endpoint), body, requester.Opts{setBasicAuth, setHeaders}); err != nil {
+	opts = append(opts, setBasicAuth, setHeaders)
+
+	if res, err = u.req.Request(method, u.getURL(endpoint), body, opts); err != nil {
 		return
 	}
 	// Defer closing the HTTP response body
@@ -117,7 +120,9 @@ func (u *UpCloud) processResponse(res *http.Response, value interface{}) (err er
 	}
 
 	// Initialize new JSON decoder and attempt to decode as provided value
-	err = json.NewDecoder(res.Body).Decode(&value)
+	if value != nil {
+		err = json.NewDecoder(res.Body).Decode(&value)
+	}
 	return
 }
 
@@ -138,7 +143,7 @@ func (u *UpCloud) processError(body io.Reader) (err error) {
 func (u *UpCloud) GetAccount() (a *Account, err error) {
 	var resp getAccountResponse
 	// Make request to "Get Account" route
-	if err = u.request("GET", RouteGetAccount, nil, &resp); err != nil {
+	if err = u.request("GET", RouteGetAccount, nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -147,11 +152,11 @@ func (u *UpCloud) GetAccount() (a *Account, err error) {
 	return
 }
 
-// GetZones
+// GetZones gets all the regions/zones
 func (u *UpCloud) GetZones() (z *[]Zone, err error) {
 	var resp getZonesResponse
 	// Make request to "Get Zones" route
-	if err = u.request("GET", RouteGetZone, nil, &resp); err != nil {
+	if err = u.request("GET", RouteGetZone, nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -160,11 +165,11 @@ func (u *UpCloud) GetZones() (z *[]Zone, err error) {
 	return
 }
 
-// GetPlans
+// GetPlans gets all the plans available
 func (u *UpCloud) GetPlans() (p *[]Plan, err error) {
 	var resp getPlansResponse
 	// Make request to "Get Plans" route
-	if err = u.request("GET", RouteGetPlan, nil, &resp); err != nil {
+	if err = u.request("GET", RouteGetPlan, nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -173,11 +178,11 @@ func (u *UpCloud) GetPlans() (p *[]Plan, err error) {
 	return
 }
 
-// GetServerSizes
+// GetServerSizes gets all the available server sizes
 func (u *UpCloud) GetServerSizes() (p *[]ServerSize, err error) {
 	var resp getServerSizesResponse
 	// Make request to "Get Server Sizes" route
-	if err = u.request("GET", RouteGetServerSize, nil, &resp); err != nil {
+	if err = u.request("GET", RouteGetServerSize, nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -186,11 +191,11 @@ func (u *UpCloud) GetServerSizes() (p *[]ServerSize, err error) {
 	return
 }
 
-// GetServers
+// GetServers gets all the servers
 func (u *UpCloud) GetServers() (p *[]Server, err error) {
 	var resp getServersResponse
 	// Make request to "Get Servers" route
-	if err = u.request("GET", RouteServer, nil, &resp); err != nil {
+	if err = u.request("GET", RouteServer, nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -199,11 +204,11 @@ func (u *UpCloud) GetServers() (p *[]Server, err error) {
 	return
 }
 
-// GetServerDetails requires UUID of the server to get the details
+// GetServerDetails gets server details based on UUID
 func (u *UpCloud) GetServerDetails(uuid string) (p *ServerDetails, err error) {
 	var resp serverDetailsWrapper
 	// Make request to "Get Servers" route
-	if err = u.request("GET", path.Join(RouteServer, uuid), nil, &resp); err != nil {
+	if err = u.request("GET", path.Join(RouteServer, uuid), nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -212,11 +217,11 @@ func (u *UpCloud) GetServerDetails(uuid string) (p *ServerDetails, err error) {
 	return
 }
 
-// GetStorages
+// GetStorages gets all the storage options
 func (u *UpCloud) GetStorages(filter RouteGetStorageFilter) (p *[]Storage, err error) {
 	var resp getStoragesResponse
 	// Make request to "Get Servers" route
-	if err = u.request("GET", string(filter), nil, &resp); err != nil {
+	if err = u.request("GET", string(filter), nil, nil, &resp); err != nil {
 		return
 	}
 
@@ -225,7 +230,7 @@ func (u *UpCloud) GetStorages(filter RouteGetStorageFilter) (p *[]Storage, err e
 	return
 }
 
-// CreateServer
+// CreateServer creates a new server
 func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, err error) {
 
 	//Dress up our new server in and wrap it
@@ -236,7 +241,7 @@ func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, 
 
 	var resp serverDetailsWrapper
 	//Let's go and make us a server
-	if err = u.request("POST", RouteServer, reqJson, &resp); err != nil {
+	if err = u.request("POST", RouteServer, nil, reqJson, &resp); err != nil {
 		return
 	}
 
@@ -245,14 +250,7 @@ func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, 
 	return
 }
 
-type stopServerRequest struct {
-	StopServer StopServer `json:"stop_server"`
-}
-type StopServer struct {
-	StopType string `json:"stop_type,omitempty"`
-	Timeout  string `json:"timeout,omitempty"`
-}
-
+// StopServer stops an already existing server
 func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails, err error) {
 	var resp serverDetailsWrapper
 
@@ -263,7 +261,7 @@ func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails,
 	var reqJson, _ = json.Marshal(stopServer)
 
 	// Make request to stop the server
-	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), reqJson, &resp); err != nil {
+	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), nil, reqJson, &resp); err != nil {
 		return
 	}
 
@@ -272,14 +270,7 @@ func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails,
 	return
 }
 
-type startServerRequest struct {
-	StartServer StartServer `json:"server"`
-}
-type StartServer struct {
-	Host      int64 `json:"host,omitempty"`
-	AvoidHost int64 `json:"avoid_host,omitempty"`
-}
-
+// StartServer starts an already existing server
 func (u *UpCloud) StartServer(uuid string, options StartServer) (s *ServerDetails, err error) {
 	var resp serverDetailsWrapper
 
@@ -290,11 +281,33 @@ func (u *UpCloud) StartServer(uuid string, options StartServer) (s *ServerDetail
 	var reqJson, _ = json.Marshal(startServer)
 
 	// Make request to stop the server
-	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), reqJson, &resp); err != nil {
+	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), nil, reqJson, &resp); err != nil {
 		return
 	}
 
 	// Set return value from response
 	s = resp.ServerDetails
+	return
+}
+
+// StopServer stops an already existing server
+func (u *UpCloud) DeleteServer(uuid string, deleteStorage bool) (err error) {
+	var opts requester.Opts = nil
+
+	//Parameter to delete storage associated with the server
+	if deleteStorage {
+		var queryParams = requester.NewQuery(requester.QueryParam{
+			Key: "storages",
+			Val: "1",
+		})
+
+		opts = requester.Opts{queryParams}
+	}
+
+	// Make request to stop the server
+	if err = u.request("DELETE", path.Join(RouteServer, uuid), opts, nil, nil); err != nil {
+		return
+	}
+
 	return
 }

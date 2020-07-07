@@ -102,3 +102,21 @@ type getServersResponse struct {
 type serverDetailsWrapper struct {
 	ServerDetails *ServerDetails `json:"server,omitempty"`
 }
+
+// StartServer optional parameters for starting servers
+type StartServer struct {
+	Host      int64 `json:"host,omitempty"`
+	AvoidHost int64 `json:"avoid_host,omitempty"`
+}
+type startServerRequest struct {
+	StartServer StartServer `json:"server"`
+}
+
+// StopServer optional parameters for stopping servers
+type StopServer struct {
+	StopType string `json:"stop_type,omitempty"`
+	Timeout  string `json:"timeout,omitempty"` //1-600 range
+}
+type stopServerRequest struct {
+	StopServer StopServer `json:"stop_server"`
+}

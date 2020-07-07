@@ -109,7 +109,7 @@ func TestUpCloud_GetZones(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test.json")))
 
 	var zones *[]Zone
 	// Get zones information of currently logged in user
@@ -228,7 +228,7 @@ func TestUpCloud_GetServerDetails(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test.json")))
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -294,7 +294,7 @@ func TestUpCloud_CreateServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
 
 	var networking = &Networking{
 		Interfaces: &Interfaces{
@@ -349,7 +349,7 @@ func TestUpCloud_StopServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -391,7 +391,7 @@ func TestUpCloud_StartServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -415,5 +415,42 @@ func TestUpCloud_StartServer(t *testing.T) {
 
 	if serverDetails.UUID == (*servers)[0].UUID {
 		fmt.Println("found our matching stopping server")
+	}
+}
+
+
+func TestUpCloud_DeleteServer(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
+		log.Fatal(err)
+	}
+
+	var oneWeFoundHostname = (*servers)[0].Hostname
+	var oneWeFoundUUID = (*servers)[0].UUID
+
+	if "sergey-test" == oneWeFoundHostname {
+		if err = u.DeleteServer(oneWeFoundUUID, true); err != nil {
+			fmt.Println("things didn't go well in deleting")
+			log.Fatal(err)
+		}
+
 	}
 }
