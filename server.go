@@ -2,103 +2,103 @@ package upcloud
 
 // Tags represents UpCloud server tags
 type Tags struct {
-	Tag *[]string `json:"tag"`
+	Tag *[]string `json:"tag,omitempty"`
 }
 type IPAddress struct {
-	Access  string `json:"access"`
-	Address string `json:"address"`
-	Family  string `json:"family"`
+	Access  string `json:"access,omitempty"`
+	Address string `json:"address,omitempty"`
+	Family  string `json:"family,omitempty"`
 }
 type IPAddresses struct {
-	IPAddress *[]IPAddress `json:"ip_address"`
+	IPAddress *[]IPAddress `json:"ip_address,omitempty"`
 }
 type Interface struct {
-	Index       int          `json:"index"`
-	IPAddresses *IPAddresses `json:"ip_addresses"`
-	Mac         string       `json:"mac"`
-	Network     string       `json:"network"`
-	Type        string       `json:"type"`
-	Bootable    string       `json:"bootable"`
+	Index       int          `json:"index,omitempty"`
+	IPAddresses *IPAddresses `json:"ip_addresses,omitempty"`
+	Mac         string       `json:"mac,omitempty"`
+	Network     string       `json:"network,omitempty"`
+	Type        string       `json:"type,omitempty"`
+	Bootable    string       `json:"bootable,omitempty"`
 }
 type Interfaces struct {
-	Interface *[]Interface `json:"interface"`
+	Interface *[]Interface `json:"interface,omitempty"`
 }
 type Networking struct {
-	Interfaces *Interfaces `json:"interfaces"`
+	Interfaces *Interfaces `json:"interfaces,omitempty"`
 }
 type StorageDevice struct {
-	Action       string `json:"action"`
-	Address      string `json:"address"`
-	PartOfPlan   string `json:"part_of_plan"`
-	Storage      string `json:"storage"`
-	StorageSize  int    `json:"storage_size"`
-	StorageTitle string `json:"storage_title"`
-	Type         string `json:"type"`
-	Title        string `json:"title"`
-	BootDisk     string `json:"boot_disk"`
+	Action       string `json:"action,omitempty"`
+	Address      string `json:"address,omitempty"`
+	PartOfPlan   string `json:"part_of_plan,omitempty"`
+	Storage      string `json:"storage,omitempty"`
+	StorageSize  int    `json:"storage_size,omitempty"`
+	StorageTitle string `json:"storage_title,omitempty"`
+	Type         string `json:"type,omitempty"`
+	Title        string `json:"title,omitempty"`
+	BootDisk     string `json:"boot_disk,omitempty"`
 }
 type StorageDevices struct {
-	StorageDevice *[]StorageDevice `json:"storage_device"`
+	StorageDevice *[]StorageDevice `json:"storage_device,omitempty"`
 }
 
 // Server represents UpCloud server
 type Server struct {
-	CoreNumber    string `json:"core_number"`
-	Hostname      string `json:"hostname"`
-	License       int    `json:"license"`
-	MemoryAmount  string `json:"memory_amount"`
-	Plan          string `json:"plan"`
-	PlanIvp4Bytes string `json:"plan_ivp4_bytes,omitempty"`
-	PlanIpv6Bytes string `json:"plan_ipv6_bytes,omitempty"`
-	State         string `json:"state"`
-	Tags          *Tags  `json:"tags"`
-	Title         string `json:"title"`
-	UUID          string `json:"uuid"`
-	Zone          string `json:"zone"`
+	CoreNumber    string `json:"core_number,omitempty"`
+	Hostname      string `json:"hostname,omitempty"`
+	License       int    `json:"license,omitempty"`
+	MemoryAmount  string `json:"memory_amount,omitempty"`
+	Plan          string `json:"plan,omitempty"`
+	PlanIvp4Bytes string `json:"plan_ivp4_bytes,omitempty,omitempty"`
+	PlanIpv6Bytes string `json:"plan_ipv6_bytes,omitempty,omitempty"`
+	State         string `json:"state,omitempty"`
+	Tags          *Tags  `json:"tags,omitempty"`
+	Title         string `json:"title,omitempty"`
+	UUID          string `json:"uuid,omitempty"`
+	Zone          string `json:"zone,omitempty"`
 }
 
 // Servers represents all UpCloud servers
 type Servers struct {
-	Server *[]Server `json:"server"`
+	Server *[]Server `json:"server,omitempty"`
 }
 
 // ServerDetails represents all UpCloud detailed server objects
 type ServerDetails struct {
-	BootOrder            string          `json:"boot_order"`
-	CoreNumber           string          `json:"core_number"`
-	Firewall             string          `json:"firewall"`
-	Host                 int64           `json:"host"`
-	Hostname             string          `json:"hostname"`
-	IPAddresses          *IPAddresses    `json:"ip_addresses"`
-	License              int             `json:"license"`
-	MemoryAmount         string          `json:"memory_amount"`
-	Networking           *Networking     `json:"networking"`
-	NicModel             string          `json:"nic_model"`
-	Plan                 string          `json:"plan"`
-	PlanIpv4Bytes        string          `json:"plan_ipv4_bytes"`
-	PlanIpv6Bytes        string          `json:"plan_ipv6_bytes"`
-	SimpleBackup         string          `json:"simple_backup"`
-	State                string          `json:"state"`
-	StorageDevices       *StorageDevices `json:"storage_devices"`
-	Tags                 *Tags           `json:"tags"`
-	Timezone             string          `json:"timezone"`
-	Title                string          `json:"title"`
-	UUID                 string          `json:"uuid"`
-	VideoModel           string          `json:"video_model"`
-	RemoteAccessEnabled  string          `json:"remote_access_enabled"`
-	RemoteAccessType     string          `json:"remote_access_type"`
-	RemoteAccessHost     string          `json:"remote_access_host"`
-	RemoteAccessPassword string          `json:"remote_access_password"`
-	RemoteAccessPort     string          `json:"remote_access_port"`
-	Zone                 string          `json:"zone"`
+	BootOrder            string          `json:"boot_order,omitempty"`
+	CoreNumber           string          `json:"core_number,omitempty"`
+	Firewall             string          `json:"firewall,omitempty"`
+	Host                 int64           `json:"host,omitempty"`
+	Hostname             string          `json:"hostname,omitempty"`
+	IPAddresses          *IPAddresses    `json:"ip_addresses,omitempty"`
+	License              int             `json:"license,omitempty"`
+	MemoryAmount         string          `json:"memory_amount,omitempty"`
+	Networking           *Networking     `json:"networking,omitempty"`
+	NicModel             string          `json:"nic_model,omitempty"`
+	Plan                 string          `json:"plan,omitempty"`
+	PlanIpv4Bytes        string          `json:"plan_ipv4_bytes,omitempty"`
+	PlanIpv6Bytes        string          `json:"plan_ipv6_bytes,omitempty"`
+	SimpleBackup         string          `json:"simple_backup,omitempty"`
+	State                string          `json:"state,omitempty"`
+	StorageDevices       *StorageDevices `json:"storage_devices,omitempty"`
+	Tags                 *Tags           `json:"tags,omitempty"`
+	Timezone             string          `json:"timezone,omitempty"`
+	Title                string          `json:"title,omitempty"`
+	UUID                 string          `json:"uuid,omitempty"`
+	VideoModel           string          `json:"video_model,omitempty"`
+	RemoteAccessEnabled  string          `json:"remote_access_enabled,omitempty"`
+	RemoteAccessType     string          `json:"remote_access_type,omitempty"`
+	RemoteAccessHost     string          `json:"remote_access_host,omitempty"`
+	RemoteAccessPassword string          `json:"remote_access_password,omitempty"`
+	RemoteAccessPort     string          `json:"remote_access_port,omitempty"`
+	Zone                 string          `json:"zone,omitempty"`
 }
 
 // getServersResponse is a response wrapper to match the UpCloud API payload
 type getServersResponse struct {
-	Servers *Servers `json:"servers"`
+	Servers *Servers `json:"servers,omitempty"`
 }
 
 // serverDetailsWrapper is a response wrapper to match the UpCloud API payload
 type serverDetailsWrapper struct {
-	ServerDetails *ServerDetails `json:"server"`
+	ServerDetails *ServerDetails `json:"server,omitempty"`
 }

@@ -31,17 +31,25 @@ const (
 
 // RouteGetStorageFilter gets all the storage options for the server
 type RouteGetStorageFilter string
+
 const (
-	All RouteGetStorageFilter = "storage"
-	Public RouteGetStorageFilter = "storage/public"
-	Private RouteGetStorageFilter = "storage/private"
-	Normal RouteGetStorageFilter = "storage/normal"
-	Backup RouteGetStorageFilter = "storage/backup"
-	Cdrom RouteGetStorageFilter = "storage/cdrom"
+	All      RouteGetStorageFilter = "storage"
+	Public   RouteGetStorageFilter = "storage/public"
+	Private  RouteGetStorageFilter = "storage/private"
+	Normal   RouteGetStorageFilter = "storage/normal"
+	Backup   RouteGetStorageFilter = "storage/backup"
+	Cdrom    RouteGetStorageFilter = "storage/cdrom"
 	Template RouteGetStorageFilter = "storage/template"
 	Favorite RouteGetStorageFilter = "storage/favorite"
 )
 
+// ServerStopType defines server stop
+type ServerStopType string
+
+const (
+	Soft ServerStopType = "soft"
+	Hard ServerStopType = "hard"
+)
 
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
@@ -81,7 +89,12 @@ func (u *UpCloud) request(method, endpoint string, body []byte, resp interface{}
 		return nil
 	}
 
-	if res, err = u.req.Request(method, u.getURL(endpoint), body, requester.Opts{setBasicAuth}); err != nil {
+	var setHeaders requester.Headers = requester.NewHeaders(requester.Header{
+		Key: "Content-Type",
+		Val: "application/json",
+	})
+
+	if res, err = u.req.Request(method, u.getURL(endpoint), body, requester.Opts{setBasicAuth, setHeaders}); err != nil {
 		return
 	}
 	// Defer closing the HTTP response body
@@ -212,7 +225,6 @@ func (u *UpCloud) GetStorages(filter RouteGetStorageFilter) (p *[]Storage, err e
 	return
 }
 
-
 // CreateServer
 func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, err error) {
 
@@ -233,5 +245,56 @@ func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, 
 	return
 }
 
+type stopServerRequest struct {
+	StopServer StopServer `json:"stop_server"`
+}
+type StopServer struct {
+	StopType string `json:"stop_type,omitempty"`
+	Timeout  string `json:"timeout,omitempty"`
+}
 
+func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails, err error) {
+	var resp serverDetailsWrapper
 
+	var stopServer = stopServerRequest{
+		StopServer: options,
+	}
+
+	var reqJson, _ = json.Marshal(stopServer)
+
+	// Make request to stop the server
+	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), reqJson, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	s = resp.ServerDetails
+	return
+}
+
+type startServerRequest struct {
+	StartServer StartServer `json:"server"`
+}
+type StartServer struct {
+	Host      int64 `json:"host,omitempty"`
+	AvoidHost int64 `json:"avoid_host,omitempty"`
+}
+
+func (u *UpCloud) StartServer(uuid string, options StartServer) (s *ServerDetails, err error) {
+	var resp serverDetailsWrapper
+
+	var startServer = startServerRequest{
+		StartServer: options,
+	}
+
+	var reqJson, _ = json.Marshal(startServer)
+
+	// Make request to stop the server
+	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), reqJson, &resp); err != nil {
+		return
+	}
+
+	// Set return value from response
+	s = resp.ServerDetails
+	return
+}

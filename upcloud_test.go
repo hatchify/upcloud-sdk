@@ -228,7 +228,7 @@ func TestUpCloud_GetServerDetails(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test.json")))
 
 	var servers *[]Server
 	// Get servers of currently logged in user
@@ -238,6 +238,9 @@ func TestUpCloud_GetServerDetails(t *testing.T) {
 	}
 
 	var oneWeFound = (*servers)[0].UUID
+
+	//Debug
+	fmt.Println((*servers)[0])
 
 	var serverDetails *ServerDetails
 	// Get servers of currently logged in user
@@ -274,4 +277,143 @@ func TestUpCloud_GetStorages(t *testing.T) {
 	}
 
 	fmt.Println((*storages)[0].Access == "public")
+}
+
+func TestUpCloud_CreateServer(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+
+	var networking = &Networking{
+		Interfaces: &Interfaces{
+			Interface: &[]Interface{{
+				IPAddresses: &IPAddresses{
+					IPAddress: &[]IPAddress{{
+						Family: "IPv4",
+					}}},
+				Type: "public",
+			}},
+		}}
+
+	var storage = &StorageDevices{
+		StorageDevice: &[]StorageDevice{{
+			Action:  "clone",
+			Storage: "01000000-0000-4000-8000-000030200200",
+			Title:   "MadFastStripedRaid",
+		}}}
+
+	var serverDetails = &ServerDetails{
+		Hostname:       "sergey-test",
+		Networking:     networking,
+		StorageDevices: storage,
+		Title:          "SergeyTest",
+		Zone:           "us-chi1",
+	}
+
+	var result *ServerDetails
+	// Get servers of currently logged in user
+	if result, err = u.CreateServer(serverDetails); err != nil {
+		// Error encountered while getting servers
+		log.Fatal(err)
+	}
+
+	if result.Hostname == "sergey-test" {
+		fmt.Println("found our machine in server details")
+	}
+}
+
+func TestUpCloud_StopServer(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
+		log.Fatal(err)
+	}
+
+	var oneWeFound = (*servers)[0].UUID
+
+	//Debug
+	fmt.Println((*servers)[0])
+
+	var serverDetails *ServerDetails
+	// Get servers details of the server we are about to stop
+	serverDetails, err = u.StopServer(oneWeFound, StopServer{StopType: string(Soft), Timeout:  "60"})
+	if err != nil {
+		// Error encountered while stopping the server
+		log.Fatal(err)
+	}
+
+	if serverDetails.UUID == (*servers)[0].UUID {
+		fmt.Println("found our matching stopping server")
+	}
+}
+
+func TestUpCloud_StartServer(t *testing.T) {
+	var (
+		u   *UpCloud
+		err error
+	)
+
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
+
+	if u, err = New(username, password); err != nil {
+		t.Fatal(err)
+	}
+
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("/home/sergey/Documents/test_post.json")))
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
+		log.Fatal(err)
+	}
+
+	var oneWeFound = (*servers)[0].UUID
+
+	//Debug
+	fmt.Println((*servers)[0])
+
+	var serverDetails *ServerDetails
+	// Get servers details of the server we are about to stop
+	serverDetails, err = u.StartServer(oneWeFound, StartServer{})
+	if err != nil {
+		// Error encountered while stopping the server
+		log.Fatal(err)
+	}
+
+	if serverDetails.UUID == (*servers)[0].UUID {
+		fmt.Println("found our matching stopping server")
+	}
 }
