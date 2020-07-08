@@ -19,8 +19,8 @@ func setup(t *testing.T) (u *UpCloud, err error) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
-	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
 
 	return
 }
@@ -254,32 +254,56 @@ func TestUpCloud_CreateServer(t *testing.T) {
 	}
 }
 
-func TestUpCloud_StopServer(t *testing.T) {
+func ExampleUpCloud_CreateServer() {
 
-	u, err := setup(t)
+	var (
+		u   *UpCloud
+		err error
+	)
+	// Get username from OS environment
+	username := os.Getenv("UPCLOUD_USERNAME")
+	// Get password from OS environment
+	password := os.Getenv("UPCLOUD_PASSWORD")
 
-	var servers *[]Server
+	if u, err = New(username, password); err != nil {
+		log.Fatal("Couldn't create UpCloud object")
+	}
+
+	var networking = &Networking{
+		Interfaces: &Interfaces{
+			Interface: &[]Interface{{
+				IPAddresses: &IPAddresses{
+					IPAddress: &[]IPAddress{{
+						Family: "IPv4",
+					}}},
+				Type: "public",
+			}},
+		}}
+
+	var storage = &StorageDevices{
+		StorageDevice: &[]StorageDevice{{
+			Action:  "clone",
+			Storage: "01000000-0000-4000-8000-000030200200",
+			Title:   "MadFastStripedRaid",
+		}}}
+
+	var serverDetails = &ServerDetails{
+		Hostname:       "sergey-test",
+		Networking:     networking,
+		StorageDevices: storage,
+		Title:          "SergeyTest",
+		Zone:           "us-chi1",
+	}
+
+	var result *ServerDetails
 	// Get servers of currently logged in user
-	if servers, err = u.GetServers(); err != nil {
+	if result, err = u.CreateServer(serverDetails); err != nil {
 		// Error encountered while getting servers
 		log.Fatal(err)
 	}
 
-	var oneWeFound = (*servers)[0].UUID
-
-	//Debug
-	fmt.Println((*servers)[0])
-
-	var serverDetails *ServerDetails
-	// Get servers details of the server we are about to stop
-	serverDetails, err = u.StopServer(oneWeFound, StopServer{StopType: string(Soft), Timeout: "60"})
-	if err != nil {
-		// Error encountered while stopping the server
-		log.Fatal(err)
-	}
-
-	if serverDetails.UUID == (*servers)[0].UUID {
-		fmt.Println("found our matching stopping server")
+	if result.Hostname == "sergey-test" {
+		fmt.Println("found our machine in server details")
 	}
 }
 
@@ -294,21 +318,67 @@ func TestUpCloud_StartServer(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	var oneWeFound = (*servers)[0].UUID
+	for _, server := range *servers {
 
-	//Debug
-	fmt.Println((*servers)[0])
+		if "sergey-test" == server.Hostname {
+			//Debug
+			fmt.Println(server)
 
-	var serverDetails *ServerDetails
-	// Get servers details of the server we are about to stop
-	serverDetails, err = u.StartServer(oneWeFound, StartServer{})
-	if err != nil {
-		// Error encountered while stopping the server
+			if server.State == "stopped" {
+				var serverDetails *ServerDetails
+				// Get servers details of the server we are about to stop
+				serverDetails, err = u.StartServer(server.UUID, StartServer{})
+				if err != nil {
+					// Error encountered while stopping the server
+					log.Fatal(err)
+				}
+
+				if serverDetails.UUID == server.UUID {
+					fmt.Println("found our matching stopping server")
+				}
+			} else {
+				t.Skip("server is in a bad state to start (aka \"maintenance\" or \"started\")")
+			}
+		} else {
+			t.Fatal("Didn't find the server we needed to start")
+		}
+	}
+}
+
+func TestUpCloud_StopServer(t *testing.T) {
+
+	u, err := setup(t)
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
 		log.Fatal(err)
 	}
 
-	if serverDetails.UUID == (*servers)[0].UUID {
-		fmt.Println("found our matching stopping server")
+	for _, server := range *servers {
+		if "sergey-test" == server.Hostname {
+			//Debug
+			fmt.Println(server)
+
+			if server.State == "started" {
+				var serverDetails *ServerDetails
+				// Get servers details of the server we are about to stop
+				serverDetails, err = u.StopServer(server.UUID, StopServer{StopType: string(Hard), Timeout: "60"})
+				if err != nil {
+					// Error encountered while stopping the server
+					log.Fatal(err)
+				}
+
+				if serverDetails.UUID == server.UUID {
+					fmt.Println("found our matching stopping server")
+				}
+			} else {
+				t.Skip("server is in a bad state to start (aka \"maintenance\" or \"stopped\")")
+			}
+		} else {
+			t.Fatal("Didn't find the server we needed to stop")
+		}
 	}
 }
 
@@ -323,13 +393,17 @@ func TestUpCloud_DeleteServer(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	var oneWeFoundHostname = (*servers)[0].Hostname
-	var oneWeFoundUUID = (*servers)[0].UUID
-
-	if "sergey-test" == oneWeFoundHostname {
-		if err = u.DeleteServer(oneWeFoundUUID, true); err != nil {
-			fmt.Println("things didn't go well in deleting")
-			log.Fatal(err)
+	for _, server := range *servers {
+		if server.Hostname == "sergey-test" {
+			if server.State == "stopped" {
+				if err = u.DeleteServer(server.UUID, true); err != nil {
+					log.Fatal("Unable to delete the server")
+				}
+			} else {
+				t.Skip("server is in a bad state to delete (aka \"maintenance\" or \"started\")")
+			}
+		} else {
+			t.Fatal("Didn't find the server we needed to delete")
 		}
 	}
 }
