@@ -30,7 +30,7 @@ func setup(t *testing.T) (u *UpCloud) {
 	store.Load()
 
 	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, store))
-	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewFileStore("testdata/test-machine-full-run.json")))
+	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, store))
 
 	return
 }
