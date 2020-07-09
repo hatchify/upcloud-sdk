@@ -56,8 +56,8 @@ type Server struct {
 	License       int    `json:"license,omitempty"`
 	MemoryAmount  string `json:"memory_amount,omitempty"`
 	Plan          string `json:"plan,omitempty"`
-	PlanIvp4Bytes string `json:"plan_ivp4_bytes,omitempty,omitempty"`
-	PlanIpv6Bytes string `json:"plan_ipv6_bytes,omitempty,omitempty"`
+	PlanIvp4Bytes string `json:"plan_ivp4_bytes,omitempty"`
+	PlanIpv6Bytes string `json:"plan_ipv6_bytes,omitempty"`
 	State         string `json:"state,omitempty"`
 	Tags          *Tags  `json:"tags,omitempty"`
 	Title         string `json:"title,omitempty"`

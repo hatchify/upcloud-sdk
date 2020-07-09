@@ -2,11 +2,12 @@ package upcloud
 
 import (
 	"fmt"
-	"github.com/hatchify/requester"
 	"log"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/hatchify/requester"
 )
 
 const (
@@ -25,8 +26,8 @@ func setup(t *testing.T) (u *UpCloud) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
-	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test-machine-full-run.json")))
-	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test-machine-full-run.json")))
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewFileStore("testdata/test-machine-full-run.json")))
+	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewFileStore("testdata/test-machine-full-run.json")))
 
 	return
 }
@@ -284,7 +285,7 @@ func TestUpCloud_CreateServer(t *testing.T) {
 
 func TestUpCloud_CreateServerWithMocks(t *testing.T) {
 	//Implement mock based server creation very similar to regular CreateServer Test
-	//We can also implement dynamic parameters by taking requests from JsonFileStore and dumping them into MapStore
+	//We can also implement dynamic parameters by taking requests from FileStore and dumping them into MapStore
 
 	//1. Create server request gets sent and a 200 response comes back for it
 	//2. Make sure the server name matches in the response that comes back

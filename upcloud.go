@@ -2,11 +2,11 @@ package upcloud
 
 import (
 	"encoding/json"
-	"github.com/hatchify/requester"
 	"io"
 	"net/http"
-	"net/url"
 	"path"
+
+	"github.com/hatchify/requester"
 )
 
 const (
@@ -64,8 +64,7 @@ func (u *UpCloud) SetRequester(newReq requester.Interface) {
 
 // UpCloud manages requests to the UpCloud API
 type UpCloud struct {
-	req  requester.Interface
-	host *url.URL
+	req requester.Interface
 
 	// Login credentials
 	username string
@@ -229,11 +228,11 @@ func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, 
 	var req = serverDetailsWrapper{
 		ServerDetails: serverDetails,
 	}
-	var reqJson, _ = json.Marshal(req)
+	var reqJSON, _ = json.Marshal(req)
 
 	var resp serverDetailsWrapper
 	//Let's go and make us a server
-	if err = u.request("POST", RouteServer, nil, reqJson, &resp); err != nil {
+	if err = u.request("POST", RouteServer, nil, reqJSON, &resp); err != nil {
 		return
 	}
 
@@ -250,10 +249,10 @@ func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails,
 		StopServer: options,
 	}
 
-	var reqJson, _ = json.Marshal(stopServer)
+	var reqJSON, _ = json.Marshal(stopServer)
 
 	// Make request to stop the server
-	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), nil, reqJson, &resp); err != nil {
+	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), nil, reqJSON, &resp); err != nil {
 		return
 	}
 
@@ -270,10 +269,10 @@ func (u *UpCloud) StartServer(uuid string, options StartServer) (s *ServerDetail
 		StartServer: options,
 	}
 
-	var reqJson, _ = json.Marshal(startServer)
+	var reqJSON, _ = json.Marshal(startServer)
 
 	// Make request to stop the server
-	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), nil, reqJson, &resp); err != nil {
+	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), nil, reqJSON, &resp); err != nil {
 		return
 	}
 
