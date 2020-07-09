@@ -9,7 +9,13 @@ import (
 	"testing"
 )
 
-func setup(t *testing.T) (u *UpCloud, err error) {
+const (
+	machineHostname = "sdk-test-machine"
+)
+
+func setup(t *testing.T) (u *UpCloud) {
+	var err error
+
 	// Get username from OS environment
 	username := os.Getenv("UPCLOUD_USERNAME")
 	// Get password from OS environment
@@ -19,8 +25,8 @@ func setup(t *testing.T) (u *UpCloud, err error) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
-	//u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
-	u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test_post.json")))
+	u.SetRequester(requester.NewMock(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test-machine-full-run.json")))
+	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, requester.NewJsonFileStore("testdata/test-machine-full-run.json")))
 
 	return
 }
@@ -48,13 +54,14 @@ func TestNew(t *testing.T) {
 
 func TestUpcloud_GetAccount(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var a *Account
 	if a, err = u.GetAccount(); err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(a)
+	t.Log(a)
 
 }
 
@@ -99,18 +106,19 @@ func ExampleUpCloud_GetAccount() {
 
 func TestUpCloud_GetZones(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var zones *[]Zone
 	// Get zones information of currently logged in user
 	if zones, err = u.GetZones(); err != nil {
 		// Error encountered while getting zones information
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, z := range *zones {
 		if z.ID == "de-fra1" && z.Description == "Frankfurt #1" {
-			fmt.Println(z.ID)
+			t.Log(z.ID)
 			// Output: de-fra1
 		}
 	}
@@ -118,18 +126,19 @@ func TestUpCloud_GetZones(t *testing.T) {
 
 func TestUpCloud_GetPlans(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var plans *[]Plan
 	// Get plans information of currently logged in user
 	if plans, err = u.GetPlans(); err != nil {
 		// Error encountered while getting account information
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, p := range *plans {
 		if p.Name == "1xCPU-2GB" && p.CoreNumber == 1 {
-			fmt.Println(p.Name)
+			t.Log(p.Name)
 			// Output: 1xCPU-2GB
 		}
 	}
@@ -137,18 +146,19 @@ func TestUpCloud_GetPlans(t *testing.T) {
 
 func TestUpCloud_GetServerSizes(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var serverSizes *[]ServerSize
 	// Get plans information of currently logged in user
 	if serverSizes, err = u.GetServerSizes(); err != nil {
 		// Error encountered while getting account information
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, ss := range *serverSizes {
 		if ss.MemoryAmount == "2048" && ss.CoreNumber == "1" {
-			fmt.Println("We found our 2048mb with 1 core machine!")
+			t.Log("We found our 2048mb with 1 core machine!")
 			// Output: We found our 2048mb with 1 core machine!
 		}
 	}
@@ -156,65 +166,83 @@ func TestUpCloud_GetServerSizes(t *testing.T) {
 
 func TestUpCloud_GetServers(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, s := range *servers {
-		fmt.Println(s)
+		t.Log(s)
 	}
 }
 
 func TestUpCloud_GetServerDetails(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	var oneWeFound = (*servers)[0].UUID
 
 	//Debug
-	fmt.Println((*servers)[0])
+	t.Log((*servers)[0])
 
 	var serverDetails *ServerDetails
 	// Get servers of currently logged in user
 	if serverDetails, err = u.GetServerDetails(oneWeFound); err != nil {
 		// Error encountered while getting account information
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	if serverDetails.Hostname == "hatch-dev" {
-		fmt.Println("found our machine in server details")
+		t.Log("found our machine in server details")
 	}
 }
 
 func TestUpCloud_GetStorages(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var storages *[]Storage
 	// Get storages
 	if storages, err = u.GetStorages(Public); err != nil {
 		// Error encountered while getting storages
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
-	fmt.Println((*storages)[0].Access == "public")
+	t.Log((*storages)[0].Access == "public")
 }
 
 func TestUpCloud_CreateServer(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
+
+	var servers *[]Server
+	// Get servers of currently logged in user
+	if servers, err = u.GetServers(); err != nil {
+		// Error encountered while getting servers
+		t.Fatal(err)
+	}
+
+	for _, server := range *servers {
+
+		if machineHostname == server.Hostname {
+			t.Skip("server with this name already exists!")
+		}
+	}
 
 	var networking = &Networking{
 		Interfaces: &Interfaces{
@@ -235,10 +263,10 @@ func TestUpCloud_CreateServer(t *testing.T) {
 		}}}
 
 	var serverDetails = &ServerDetails{
-		Hostname:       "sergey-test",
+		Hostname:       machineHostname,
 		Networking:     networking,
 		StorageDevices: storage,
-		Title:          "SergeyTest",
+		Title:          machineHostname,
 		Zone:           "us-chi1",
 	}
 
@@ -246,11 +274,11 @@ func TestUpCloud_CreateServer(t *testing.T) {
 	// Get servers of currently logged in user
 	if result, err = u.CreateServer(serverDetails); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
-	if result.Hostname == "sergey-test" {
-		fmt.Println("found our machine in server details")
+	if result.Hostname == machineHostname {
+		t.Log("found our machine in server details")
 	}
 }
 
@@ -288,10 +316,10 @@ func ExampleUpCloud_CreateServer() {
 		}}}
 
 	var serverDetails = &ServerDetails{
-		Hostname:       "sergey-test",
+		Hostname:       machineHostname,
 		Networking:     networking,
 		StorageDevices: storage,
-		Title:          "SergeyTest",
+		Title:          machineHostname,
 		Zone:           "us-chi1",
 	}
 
@@ -302,27 +330,28 @@ func ExampleUpCloud_CreateServer() {
 		log.Fatal(err)
 	}
 
-	if result.Hostname == "sergey-test" {
+	if result.Hostname == machineHostname {
 		fmt.Println("found our machine in server details")
 	}
 }
 
 func TestUpCloud_StartServer(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, server := range *servers {
 
-		if "sergey-test" == server.Hostname {
+		if machineHostname == server.Hostname {
 			//Debug
-			fmt.Println(server)
+			t.Log(server)
 
 			if server.State == "stopped" {
 				var serverDetails *ServerDetails
@@ -330,36 +359,36 @@ func TestUpCloud_StartServer(t *testing.T) {
 				serverDetails, err = u.StartServer(server.UUID, StartServer{})
 				if err != nil {
 					// Error encountered while stopping the server
-					log.Fatal(err)
+					t.Fatal(err)
 				}
 
 				if serverDetails.UUID == server.UUID {
-					fmt.Println("found our matching stopping server")
+					t.Log("found our matching stopped server and we started it")
+					return
 				}
 			} else {
 				t.Skip("server is in a bad state to start (aka \"maintenance\" or \"started\")")
 			}
-		} else {
-			t.Fatal("Didn't find the server we needed to start")
 		}
 	}
 }
 
 func TestUpCloud_StopServer(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, server := range *servers {
-		if "sergey-test" == server.Hostname {
+		if machineHostname == server.Hostname {
 			//Debug
-			fmt.Println(server)
+			t.Log(server)
 
 			if server.State == "started" {
 				var serverDetails *ServerDetails
@@ -371,39 +400,37 @@ func TestUpCloud_StopServer(t *testing.T) {
 				}
 
 				if serverDetails.UUID == server.UUID {
-					fmt.Println("found our matching stopping server")
+					t.Log("found our matching started server and we stopped it")
+					return
 				}
 			} else {
 				t.Skip("server is in a bad state to start (aka \"maintenance\" or \"stopped\")")
 			}
-		} else {
-			t.Fatal("Didn't find the server we needed to stop")
 		}
 	}
 }
 
 func TestUpCloud_DeleteServer(t *testing.T) {
 
-	u, err := setup(t)
+	var err error
+	u := setup(t)
 
 	var servers *[]Server
 	// Get servers of currently logged in user
 	if servers, err = u.GetServers(); err != nil {
 		// Error encountered while getting servers
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	for _, server := range *servers {
-		if server.Hostname == "sergey-test" {
+		if server.Hostname == machineHostname {
 			if server.State == "stopped" {
 				if err = u.DeleteServer(server.UUID, true); err != nil {
-					log.Fatal("Unable to delete the server")
+					t.Fatal("Unable to delete the server")
 				}
 			} else {
 				t.Skip("server is in a bad state to delete (aka \"maintenance\" or \"started\")")
 			}
-		} else {
-			t.Fatal("Didn't find the server we needed to delete")
 		}
 	}
 }

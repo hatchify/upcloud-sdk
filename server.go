@@ -1,5 +1,13 @@
 package upcloud
 
+// ServerStopType defines server stop
+type ServerStopType string
+
+const (
+	Soft ServerStopType = "soft"
+	Hard ServerStopType = "hard"
+)
+
 // Tags represents UpCloud server tags
 type Tags struct {
 	Tag *[]string `json:"tag,omitempty"`

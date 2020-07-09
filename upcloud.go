@@ -43,14 +43,6 @@ const (
 	Favorite RouteGetStorageFilter = "storage/favorite"
 )
 
-// ServerStopType defines server stop
-type ServerStopType string
-
-const (
-	Soft ServerStopType = "soft"
-	Hard ServerStopType = "hard"
-)
-
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
 	var u UpCloud
