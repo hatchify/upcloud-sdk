@@ -282,6 +282,20 @@ func TestUpCloud_CreateServer(t *testing.T) {
 	}
 }
 
+func TestUpCloud_CreateServerWithMocks(t *testing.T) {
+	//Implement mock based server creation very similar to regular CreateServer Test
+	//We can also implement dynamic parameters by taking requests from JsonFileStore and dumping them into MapStore
+
+	//1. Create server request gets sent and a 200 response comes back for it
+	//2. Make sure the server name matches in the response that comes back
+}
+
+func TestUpCloud_FullServerCreationCycleWithMocks(t *testing.T) {
+	//Implement a mock based full working cycle for create/stop/start/stop/delete
+	//This should probably use several JsonFileStores to have different started/stopped states
+	//We should use already existing test and just doing t.Run() on them
+}
+
 func ExampleUpCloud_CreateServer() {
 
 	var (
