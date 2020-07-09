@@ -3,10 +3,10 @@ package upcloud
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"testing"
 
+	"github.com/hatchify/requester"
 	"github.com/hatchify/requester/mock"
 )
 
@@ -26,10 +26,13 @@ func setup(t *testing.T) (u *UpCloud) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
-	var store = mock.NewFileStore("testdata/test-machine-full-run.json")
-	store.Load()
+	var backend = mock.NewFileBackend("testdata/test-machine-full-run.json")
 
-	u.SetRequester(mock.NewMock(&http.Client{}, Hostname, store))
+	var r requester.Interface
+
+	r, err = mock.NewRequester(Hostname, backend)
+
+	u.SetRequester(r)
 	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, store))
 
 	return
