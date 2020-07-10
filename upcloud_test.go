@@ -26,14 +26,16 @@ func setup(t *testing.T) (u *UpCloud) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
+	//Define what will be the backend for our mocks
 	var backend = mock.NewFileBackend("testdata/new-backend.json")
 
+	//Setup Mock Requester
 	var r requester.Interface
-
-	r, err = mock.NewRequester(Hostname, backend)
+	if r, err = mock.NewRequester(Hostname, backend); err != nil {
+		t.Fatal(err)
+	}
 
 	u.SetRequester(r)
-	//u.SetRequester(requester.NewSpy(&http.Client{}, Hostname, store))
 
 	return
 }
