@@ -26,7 +26,7 @@ func setup(t *testing.T) (u *UpCloud) {
 		t.Fatal("Couldn't create UpCloud object")
 	}
 
-	var backend = mock.NewFileBackend("testdata/test-machine-full-run.json")
+	var backend = mock.NewFileBackend("testdata/new-backend.json")
 
 	var r requester.Interface
 
