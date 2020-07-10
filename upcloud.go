@@ -228,7 +228,10 @@ func (u *UpCloud) CreateServer(serverDetails *ServerDetails) (p *ServerDetails, 
 	var req = serverDetailsWrapper{
 		ServerDetails: serverDetails,
 	}
-	var reqJSON, _ = json.Marshal(req)
+	var reqJSON []byte
+	if reqJSON, err = json.Marshal(req); err != nil {
+		return
+	}
 
 	var resp serverDetailsWrapper
 	//Let's go and make us a server
@@ -249,7 +252,10 @@ func (u *UpCloud) StopServer(uuid string, options StopServer) (s *ServerDetails,
 		StopServer: options,
 	}
 
-	var reqJSON, _ = json.Marshal(stopServer)
+	var reqJSON []byte
+	if reqJSON, err = json.Marshal(stopServer); err != nil {
+		return
+	}
 
 	// Make request to stop the server
 	if err = u.request("POST", path.Join(RouteServer, uuid, "stop"), nil, reqJSON, &resp); err != nil {
@@ -269,7 +275,10 @@ func (u *UpCloud) StartServer(uuid string, options StartServer) (s *ServerDetail
 		StartServer: options,
 	}
 
-	var reqJSON, _ = json.Marshal(startServer)
+	var reqJSON []byte
+	if reqJSON, err = json.Marshal(startServer); err != nil {
+		return
+	}
 
 	// Make request to stop the server
 	if err = u.request("POST", path.Join(RouteServer, uuid, "start"), nil, reqJSON, &resp); err != nil {
