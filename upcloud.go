@@ -1,6 +1,7 @@
 package upcloud
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -19,6 +20,15 @@ const (
 	// RouteGetAccount is the route for getting current account
 	RouteGetAccount = "account"
 )
+
+// withCtx applies context to the the http.Request and returns *http.Request
+// The provided ctx and req must be non-nil
+func withCtx(ctx context.Context, req *http.Request) *http.Request {
+	if req == nil {
+		panic("nil http.Request")
+	}
+	return req.WithContext(ctx)
+}
 
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
@@ -46,7 +56,7 @@ type UpCloud struct {
 	password string
 }
 
-func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interface{}) (err error) {
+func (u *UpCloud) request(ctx context.Context, method, endpoint string, body io.Reader, resp interface{}) (err error) {
 	var req *http.Request
 	// Create a new request
 	if req, err = u.newHTTPRequest(method, u.getURL(endpoint), body); err != nil {
@@ -56,7 +66,7 @@ func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interfac
 
 	var res *http.Response
 	// Perform request using SDK's underlying HTTP client
-	if res, err = u.hc.Do(req); err != nil {
+	if res, err = u.hc.Do(withCtx(ctx, req)); err != nil {
 		// Error encountered while performing request, return
 		return
 	}
@@ -114,10 +124,10 @@ func (u *UpCloud) processError(body io.Reader) (err error) {
 }
 
 // GetAccount will get the account of the currently logged in user
-func (u *UpCloud) GetAccount() (a *Account, err error) {
+func (u *UpCloud) GetAccount(ctx context.Context) (a *Account, err error) {
 	var resp getAccountResponse
 	// Make request to "Get Account" route
-	if err = u.request("GET", RouteGetAccount, nil, &resp); err != nil {
+	if err = u.request(ctx, "GET", RouteGetAccount, nil, &resp); err != nil {
 		return
 	}
 
