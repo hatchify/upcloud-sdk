@@ -1,6 +1,7 @@
 package upcloud
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -46,10 +47,10 @@ type UpCloud struct {
 	password string
 }
 
-func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interface{}) (err error) {
+func (u *UpCloud) request(ctx context.Context, method, endpoint string, body io.Reader, resp interface{}) (err error) {
 	var req *http.Request
 	// Create a new request
-	if req, err = u.newHTTPRequest(method, u.getURL(endpoint), body); err != nil {
+	if req, err = u.newHTTPRequest(ctx, method, u.getURL(endpoint), body); err != nil {
 		// Error encountered while creating new HTTP request, return
 		return
 	}
@@ -67,13 +68,20 @@ func (u *UpCloud) request(method, endpoint string, body io.Reader, resp interfac
 	return u.processResponse(res, resp)
 }
 
-func (u *UpCloud) newHTTPRequest(method, url string, body io.Reader) (req *http.Request, err error) {
+func (u *UpCloud) newHTTPRequest(ctx context.Context, method, url string, body io.Reader) (req *http.Request, err error) {
 	// Create a new request using provided method, url, and body
 	if req, err = http.NewRequest(method, url, body); err != nil {
 		// Error encoutered while creating new HTTP request, return
 		return
 	}
 
+	// The provided req must be non-nil
+	if req == nil {
+		panic("nil http.Request")
+	}
+
+	// apply context to the the http.Request
+	req = req.WithContext(ctx)
 	// Set API authentication using the username/password provided at SDK initialization
 	req.SetBasicAuth(u.username, u.password)
 	return
@@ -114,10 +122,10 @@ func (u *UpCloud) processError(body io.Reader) (err error) {
 }
 
 // GetAccount will get the account of the currently logged in user
-func (u *UpCloud) GetAccount() (a *Account, err error) {
+func (u *UpCloud) GetAccount(ctx context.Context) (a *Account, err error) {
 	var resp getAccountResponse
 	// Make request to "Get Account" route
-	if err = u.request("GET", RouteGetAccount, nil, &resp); err != nil {
+	if err = u.request(ctx, "GET", RouteGetAccount, nil, &resp); err != nil {
 		return
 	}
 
