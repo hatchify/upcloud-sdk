@@ -21,15 +21,6 @@ const (
 	RouteGetAccount = "account"
 )
 
-// withCtx applies context to the the http.Request and returns *http.Request
-// The provided ctx and req must be non-nil
-func withCtx(ctx context.Context, req *http.Request) *http.Request {
-	if req == nil {
-		panic("nil http.Request")
-	}
-	return req.WithContext(ctx)
-}
-
 // New will return a new instance of the UpCloud API SDK
 func New(username, password string) (up *UpCloud, err error) {
 	var u UpCloud
@@ -84,9 +75,15 @@ func (u *UpCloud) newHTTPRequest(ctx context.Context, method, url string, body i
 		return
 	}
 
+	// The provided req must be non-nil
+	if req == nil {
+		panic("nil http.Request")
+	}
+
+	// apply context to the the http.Request
+	req = req.WithContext(ctx)
 	// Set API authentication using the username/password provided at SDK initialization
 	req.SetBasicAuth(u.username, u.password)
-	req = withCtx(ctx, req)
 	return
 }
 
