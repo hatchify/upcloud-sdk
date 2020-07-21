@@ -59,14 +59,14 @@ type UpCloud struct {
 func (u *UpCloud) request(ctx context.Context, method, endpoint string, body io.Reader, resp interface{}) (err error) {
 	var req *http.Request
 	// Create a new request
-	if req, err = u.newHTTPRequest(method, u.getURL(endpoint), body); err != nil {
+	if req, err = u.newHTTPRequest(ctx, method, u.getURL(endpoint), body); err != nil {
 		// Error encountered while creating new HTTP request, return
 		return
 	}
 
 	var res *http.Response
 	// Perform request using SDK's underlying HTTP client
-	if res, err = u.hc.Do(withCtx(ctx, req)); err != nil {
+	if res, err = u.hc.Do(req); err != nil {
 		// Error encountered while performing request, return
 		return
 	}
@@ -77,7 +77,7 @@ func (u *UpCloud) request(ctx context.Context, method, endpoint string, body io.
 	return u.processResponse(res, resp)
 }
 
-func (u *UpCloud) newHTTPRequest(method, url string, body io.Reader) (req *http.Request, err error) {
+func (u *UpCloud) newHTTPRequest(ctx context.Context, method, url string, body io.Reader) (req *http.Request, err error) {
 	// Create a new request using provided method, url, and body
 	if req, err = http.NewRequest(method, url, body); err != nil {
 		// Error encoutered while creating new HTTP request, return
@@ -86,6 +86,7 @@ func (u *UpCloud) newHTTPRequest(method, url string, body io.Reader) (req *http.
 
 	// Set API authentication using the username/password provided at SDK initialization
 	req.SetBasicAuth(u.username, u.password)
+	req = withCtx(ctx, req)
 	return
 }
 
