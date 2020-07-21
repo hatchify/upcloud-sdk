@@ -1,6 +1,7 @@
 package upcloud
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -30,12 +31,13 @@ func TestUpcloud_GetAccount(t *testing.T) {
 	// Get password from OS environment
 	password := os.Getenv("UPCLOUD_PASSWORD")
 
+	ctx := context.Background()
 	if u, err = New(username, password); err != nil {
 		t.Fatal(err)
 	}
 
 	var a *Account
-	if a, err = u.GetAccount(); err != nil {
+	if a, err = u.GetAccount(ctx); err != nil {
 		t.Fatal(err)
 	}
 
@@ -72,9 +74,11 @@ func ExampleUpCloud_GetAccount() {
 		log.Fatal(err)
 	}
 
+	// ctx := context.Background()
+	ctx := context.Background()
 	var a *Account
 	// Get account information of currently logged in user
-	if a, err = u.GetAccount(); err != nil {
+	if a, err = u.GetAccount(ctx); err != nil {
 		// Error encountered while getting account information
 		log.Fatal(err)
 	}
